@@ -4,6 +4,10 @@ import { useState } from 'react';
 import { Sidebar } from '@/components/features/sidebar';
 import { Header } from '@/components/features/header';
 
+/**
+ * ダッシュボードレイアウト
+ * 認証情報はルートレイアウトのSessionProviderから提供される
+ */
 export default function DashboardLayout({
   children,
 }: {

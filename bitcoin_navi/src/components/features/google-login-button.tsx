@@ -2,29 +2,36 @@
 
 import { Button } from '@/components/ui/button';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
+import { signIn } from 'next-auth/react';
 import { useState } from 'react';
 
 interface GoogleLoginButtonProps {
   onError?: (error: string) => void;
 }
 
+/**
+ * Google OAuth ログインボタン
+ * NextAuth.js v5 を使用したGoogle認証
+ */
 export function GoogleLoginButton({ onError }: GoogleLoginButtonProps) {
   const [isLoading, setIsLoading] = useState(false);
 
   const handleGoogleLogin = async () => {
     setIsLoading(true);
     try {
-      // Authentication logic will be added in #009
-      console.log('Initiating Google login...');
+      // NextAuth.js の signIn を呼び出してGoogle認証を開始
+      const result = await signIn('google', {
+        callbackUrl: '/dashboard',
+        redirect: true,
+      });
 
-      // Simulate API call for demonstration
-      await new Promise((resolve) => setTimeout(resolve, 1500));
-
-      // For now, redirect to dashboard (development only)
-      window.location.href = '/dashboard';
+      // エラーハンドリング（signInがエラーを返した場合）
+      if (result?.error) {
+        throw new Error(result.error);
+      }
     } catch (error) {
       console.error('Login error:', error);
-      const errorMessage = error instanceof Error ? error.message : 'Login failed';
+      const errorMessage = error instanceof Error ? error.message : 'ログインに失敗しました';
       onError?.(errorMessage);
       setIsLoading(false);
     }

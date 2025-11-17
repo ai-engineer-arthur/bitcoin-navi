@@ -85,15 +85,6 @@ export default function LoginPage() {
           </a>
           に同意したことになります
         </p>
-
-        {/* Development Note */}
-        <div className="glass rounded-lg p-3 border border-primary/20">
-          <p className="text-xs text-foreground-muted text-center">
-            💡 Google OAuth 認証は <strong className="text-primary">#009</strong> で実装予定
-            <br />
-            現在は開発モードで自動的にダッシュボードへ遷移します
-          </p>
-        </div>
       </CardContent>
     </Card>
   );
