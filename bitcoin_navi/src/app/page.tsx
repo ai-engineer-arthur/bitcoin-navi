@@ -256,16 +256,18 @@ export default function Home() {
               今すぐ Bitcoin Navi で、あなたの投資を次のレベルへ
             </p>
 
-            <Button
-              size="lg"
-              className="group relative overflow-hidden bg-gradient-to-r from-primary via-secondary to-primary-dark text-black font-bold px-12 py-7 text-xl rounded-2xl hover:shadow-2xl hover:shadow-primary/60 transition-all duration-300 hover:scale-110 animate-glow"
-            >
-              <span className="relative z-10 flex items-center">
-                <Sparkles className="mr-3 h-6 w-6 group-hover:rotate-180 transition-transform duration-500" />
-                Launch Dashboard
-                <ChevronRight className="ml-3 h-6 w-6 group-hover:translate-x-2 transition-transform" />
-              </span>
-            </Button>
+            <a href="/dashboard">
+              <Button
+                size="lg"
+                className="group relative overflow-hidden bg-gradient-to-r from-primary via-secondary to-primary-dark text-black font-bold px-12 py-7 text-xl rounded-2xl hover:shadow-2xl hover:shadow-primary/60 transition-all duration-300 hover:scale-110 animate-glow"
+              >
+                <span className="relative z-10 flex items-center">
+                  <Sparkles className="mr-3 h-6 w-6 group-hover:rotate-180 transition-transform duration-500" />
+                  Launch Dashboard
+                  <ChevronRight className="ml-3 h-6 w-6 group-hover:translate-x-2 transition-transform" />
+                </span>
+              </Button>
+            </a>
 
             <p className="mt-8 text-foreground-muted text-sm">
               無料で始める · クレジットカード不要 · 即座にアクセス
