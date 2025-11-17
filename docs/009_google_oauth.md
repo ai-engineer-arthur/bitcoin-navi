@@ -10,13 +10,15 @@ Google OAuth 2.0 を使用した認証機能を実装する。NextAuth.js v5 を
 
 ## TODO
 - [x] NextAuth.js v5 インストール・設定
-- [ ] Google Cloud Console でプロジェクト作成（ユーザー側で実施）
-- [ ] OAuth 2.0 クライアント ID 取得（ユーザー側で実施）
+- [x] Google Cloud Console でプロジェクト作成（ユーザー側で実施）
+- [x] OAuth 2.0 クライアント ID 取得（ユーザー側で実施）
 - [x] 環境変数設定（.env.local.example作成）
 - [x] Auth API Route 作成
 - [x] Middleware で認証チェック
 - [x] ログイン・ログアウト機能実装
 - [x] セッション管理
+- [x] ログインボタン可視性修正（OKLCH グラデーション背景）
+- [x] ホームページからダッシュボードへのリンク修正
 
 ## 実装詳細
 
@@ -181,6 +183,7 @@ Google OAuth認証機能の実装が完了しました！
   - Google OAuth 2.0 プロバイダーの設定
   - 保護されたルート（/dashboard, /assets, /alerts, /chat）の認証チェック
   - ログイン後のリダイレクト処理
+  - **開発環境での認証バイパス**: Google認証情報が未設定の場合、開発環境では認証チェックをスキップ（`hasGoogleCredentials` チェック）
 - **API Route** (`src/app/api/auth/[...nextauth]/route.ts`):
   - NextAuth.jsのハンドラーをエクスポート
 - **Middleware** (`middleware.ts`):
@@ -190,16 +193,19 @@ Google OAuth認証機能の実装が完了しました！
   - NextAuth.jsの signIn を統合
   - エラーハンドリング
   - ローディング状態表示
+  - **UI修正**: OKLCH色システムによるグラデーション背景（`from-primary to-secondary`）と黒いテキストで、暗いテーマでの可視性を確保
 - **Header**:
   - セッション情報の表示（ユーザー名、プロフィール画像）
   - ドロップダウンメニュー（ログアウトボタン）
   - signOut 機能
-- **DashboardLayout**:
-  - SessionProviderでラップ
+- **Providers** (`src/components/providers.tsx`):
+  - SessionProviderでルートレイアウトをラップ
   - Client Componentでセッション情報を使用可能に
 - **.env.local.example**:
   - 環境変数のサンプルファイル
   - 必要なAPIキーとシークレットの説明
+- **ホームページ** (`src/app/page.tsx`):
+  - 「Launch Dashboard」ボタンにリンク機能を追加（`<a href="/dashboard">`でラップ）
 
 ### セットアップ手順（ユーザー側で実施）
 1. Google Cloud Console でプロジェクトを作成
