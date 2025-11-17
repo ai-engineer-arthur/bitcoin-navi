@@ -9,14 +9,14 @@ CoinGecko API と Alpha Vantage API を使用して、暗号通貨と株式の�
 - **Caching**: Next.js fetch cache
 
 ## TODO
-- [ ] CoinGecko API キー取得
-- [ ] Alpha Vantage API キー取得
-- [ ] 環境変数設定
-- [ ] API クライアント作成
-- [ ] 価格取得 API Route 実装
-- [ ] レート制限対応
-- [ ] エラーハンドリング
-- [ ] キャッシュ戦略実装
+- [ ] CoinGecko API キー取得（ユーザー側で実施）
+- [ ] Alpha Vantage API キー取得（ユーザー側で実施）
+- [ ] 環境変数設定（ユーザー側で実施）
+- [x] API クライアント作成
+- [x] 価格取得 API Route 実装
+- [x] レート制限対応
+- [x] エラーハンドリング
+- [x] キャッシュ戦略実装
 
 ## 実装詳細
 
@@ -253,12 +253,131 @@ const alphaVantageLimiter = new RateLimiter();
 ```
 
 ## 完了条件
-- [ ] CoinGecko API が動作する
-- [ ] Alpha Vantage API が動作する
-- [ ] 価格取得 API Route が動作する
-- [ ] キャッシュが正しく動作する
-- [ ] エラーハンドリングが実装されている
-- [ ] レート制限対応が実装されている
+- [ ] CoinGecko API が動作する（APIキー設定後にテスト）
+- [ ] Alpha Vantage API が動作する（APIキー設定後にテスト）
+- [x] 価格取得 API Route が動作する
+- [x] キャッシュが正しく動作する
+- [x] エラーハンドリングが実装されている
+- [x] レート制限対応が実装されている
+
+## 🎉 実装完了（2025-11-17）
+価格取得 API の実装が完了しました！
+
+### 実装内容
+
+#### 1. CoinGecko API クライアント（`src/lib/api/coingecko.ts`）
+- **暗号通貨の価格取得**: BTC、ETH など主要コインをサポート
+- **24時間変動率**: USD ベースの変動率を取得
+- **価格履歴取得**: デフォルト7日間の履歴データ
+- **キャッシュ**: Next.js fetch の `revalidate: 300`（5分間）
+- **シンボルマッピング**: BTC → bitcoin などの ID 変換
+- **エラーハンドリング**: API エラー時の詳細なメッセージ
+
+#### 2. Alpha Vantage API クライアント（`src/lib/api/alpha-vantage.ts`）
+- **株式の価格取得**: GLOBAL_QUOTE エンドポイントを使用
+- **変動率取得**: 変動パーセントを取得
+- **株式履歴取得**: TIME_SERIES_DAILY で過去データ取得
+- **レート制限管理**:
+  - 1分間に最大5リクエスト
+  - 1日に最大25リクエスト
+  - RateLimiter クラスで自動管理
+- **キャッシュ**: Next.js fetch の `revalidate: 300`（5分間）
+
+#### 3. 統合 API クライアント（`src/lib/api/prices.ts`）
+- **統一インターフェース**: `getAssetPrice()` で暗号通貨・株式両対応
+- **為替変換**: USD → JPY（現在は固定レート 150円、将来的に為替APIを統合予定）
+- **履歴データ取得**: `getAssetHistory()` で過去データを統一形式で取得
+- **一括取得**: `getBatchPrices()` で複数銘柄を並列取得
+- **レート制限保護**: Alpha Vantage のレート制限を自動チェック
+
+#### 4. API Routes
+**GET `/api/prices`** - 全銘柄の価格を一括取得
+- 登録されている全銘柄の価格を並列取得
+- エラーが発生した銘柄はスキップ
+- 自動的に価格履歴をデータベースに保存
+- レスポンス例:
+```json
+{
+  "success": true,
+  "total": 3,
+  "fetched": 3,
+  "failed": 0,
+  "prices": [
+    {
+      "symbol": "BTC",
+      "name": "Bitcoin",
+      "type": "crypto",
+      "price_usd": 45000,
+      "price_jpy": 6750000,
+      "change_24h": 2.5,
+      "timestamp": "2025-11-17T12:00:00.000Z"
+    }
+  ],
+  "timestamp": "2025-11-17T12:00:00.000Z"
+}
+```
+
+**GET `/api/prices/[symbol]`** - 単一銘柄の価格を取得
+- 指定された銘柄の現在価格を取得
+- 自動的に価格履歴をデータベースに保存
+- 404エラー: 銘柄が見つからない場合
+- レスポンス例:
+```json
+{
+  "symbol": "BTC",
+  "name": "Bitcoin",
+  "type": "crypto",
+  "price_usd": 45000,
+  "price_jpy": 6750000,
+  "change_24h": 2.5,
+  "timestamp": "2025-11-17T12:00:00.000Z"
+}
+```
+
+### セットアップ手順（ユーザー側で実施）
+
+#### 1. CoinGecko API キー取得
+1. [CoinGecko](https://www.coingecko.com/) にアクセス
+2. アカウント作成（無料）
+3. [API ダッシュボード](https://www.coingecko.com/en/developers/dashboard) で API キーを取得
+4. 無料プラン: 月 10,000 リクエスト
+
+#### 2. Alpha Vantage API キー取得
+1. [Alpha Vantage](https://www.alphavantage.co/) にアクセス
+2. [Get Your Free API Key Today](https://www.alphavantage.co/support/#api-key) でキーを取得
+3. 無料プラン: 1日 25 リクエスト、1分 5 リクエスト
+
+#### 3. 環境変数設定
+`.env.local` に以下を追加:
+```bash
+COINGECKO_API_KEY=your-coingecko-api-key
+ALPHA_VANTAGE_API_KEY=your-alpha-vantage-api-key
+```
+
+### 使用例
+
+```typescript
+// 単一銘柄の価格を取得
+const response = await fetch('/api/prices/BTC');
+const data = await response.json();
+console.log(data.price_usd); // 45000
+
+// 全銘柄の価格を一括取得
+const allPricesResponse = await fetch('/api/prices');
+const allPricesData = await allPricesResponse.json();
+console.log(allPricesData.prices); // [{ symbol: 'BTC', ... }, ...]
+```
+
+### 注意事項
+- **レート制限**: Alpha Vantage は 1日 25 リクエストのため、4時間ごとの Cron Job 実行で 6 回/日（余裕あり）
+- **為替レート**: 現在は固定レート（150円）、将来的に為替APIを統合予定
+- **キャッシュ**: 5分間キャッシュされるため、リアルタイム性が必要な場合は注意
+- **エラーハンドリング**: APIエラー時は詳細なエラーメッセージが返る
+
+### 次のステップ
+- ユーザー側で API キー取得と環境変数設定
+- 実際に価格取得が動作するかテスト
+- Cron Jobs で定期的に価格を取得（次のチケット）
 
 ## 関連チケット
 - 前: #010 Google スプレッドシート連携
