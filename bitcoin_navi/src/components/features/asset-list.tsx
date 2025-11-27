@@ -18,44 +18,54 @@ interface Asset {
   currency: string;
 }
 
-// モックデータ（後でAPIから取得）
-const mockAssets: Asset[] = [
-  {
-    id: '1',
-    symbol: 'BTC',
-    name: 'Bitcoin',
-    type: 'crypto',
-    price: '¥16,330,347',
-    change: '+2.34%',
-    trend: 'up',
-    currency: 'JPY',
-  },
-  {
-    id: '2',
-    symbol: 'BBAI',
-    name: 'BigBear.ai',
-    type: 'stock',
-    price: '$12.34',
-    change: '-1.23%',
-    trend: 'down',
-    currency: 'USD',
-  },
-];
+interface BitcoinPrice {
+  jpy: number;
+  jpy_24h_change: number;
+}
 
 interface AssetListProps {
   filter?: 'all' | 'crypto' | 'stock';
   onAddAsset?: () => void;
+  bitcoinPrice?: BitcoinPrice | null;
 }
 
 /**
  * 銘柄リストコンポーネント
  * 監視中の銘柄をカード形式で表示
  */
-export function AssetList({ filter = 'all', onAddAsset }: AssetListProps) {
+export function AssetList({ filter = 'all', onAddAsset, bitcoinPrice }: AssetListProps) {
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [assetToDelete, setAssetToDelete] = useState<Asset | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
+
+  // アセットデータを動的に生成（APIから取得した価格を使用）
+  const mockAssets: Asset[] = [
+    {
+      id: '1',
+      symbol: 'BTC',
+      name: 'Bitcoin',
+      type: 'crypto',
+      price: bitcoinPrice
+        ? `¥${bitcoinPrice.jpy.toLocaleString('ja-JP')}`
+        : 'Loading...',
+      change: bitcoinPrice
+        ? `${bitcoinPrice.jpy_24h_change >= 0 ? '+' : ''}${bitcoinPrice.jpy_24h_change.toFixed(2)}%`
+        : '--',
+      trend: bitcoinPrice && bitcoinPrice.jpy_24h_change >= 0 ? 'up' : 'down',
+      currency: 'JPY',
+    },
+    {
+      id: '2',
+      symbol: 'BBAI',
+      name: 'BigBear.ai',
+      type: 'stock',
+      price: '$12.34',
+      change: '-1.23%',
+      trend: 'down',
+      currency: 'USD',
+    },
+  ];
 
   // 削除ボタンのクリックハンドラー
   const handleDeleteClick = (asset: Asset) => {

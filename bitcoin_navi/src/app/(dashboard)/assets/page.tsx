@@ -4,9 +4,14 @@ import { Button } from '@/components/ui/button';
 import { AssetList } from '@/components/features/asset-list';
 import { AddAssetModal } from '@/components/features/add-asset-modal';
 import { Plus } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 type FilterType = 'all' | 'crypto' | 'stock';
+
+interface BitcoinPrice {
+  jpy: number;
+  jpy_24h_change: number;
+}
 
 /**
  * 銘柄管理ページ
@@ -15,6 +20,30 @@ type FilterType = 'all' | 'crypto' | 'stock';
 export default function AssetsPage() {
   const [filter, setFilter] = useState<FilterType>('all');
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [bitcoinPrice, setBitcoinPrice] = useState<BitcoinPrice | null>(null);
+
+  // ビットコイン価格を取得
+  useEffect(() => {
+    const fetchPrice = async () => {
+      try {
+        const response = await fetch('/api/prices/bitcoin');
+        if (response.ok) {
+          const data = await response.json();
+          setBitcoinPrice({
+            jpy: data.currentPrice.jpy,
+            jpy_24h_change: data.currentPrice.jpy_24h_change,
+          });
+        }
+      } catch (error) {
+        console.error('Failed to fetch Bitcoin price:', error);
+      }
+    };
+
+    fetchPrice();
+    // 30秒ごとに更新
+    const interval = setInterval(fetchPrice, 30000);
+    return () => clearInterval(interval);
+  }, []);
 
   const handleAddAsset = (asset: { type: string; symbol: string; name: string }) => {
     console.log('新しい銘柄を追加:', asset);
@@ -23,16 +52,8 @@ export default function AssetsPage() {
 
   return (
     <div className="space-y-6">
-      {/* ページヘッダー */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-3xl lg:text-4xl font-bold text-gradient mb-2">
-            Assets
-          </h1>
-          <p className="text-foreground-muted">
-            監視中の暗号通貨・株式を管理
-          </p>
-        </div>
+      {/* Add Asset Button */}
+      <div className="flex justify-end">
         <Button
           onClick={() => setIsModalOpen(true)}
           className="gap-2 glow-primary"
@@ -78,7 +99,11 @@ export default function AssetsPage() {
       </div>
 
       {/* 銘柄リスト */}
-      <AssetList filter={filter} onAddAsset={() => setIsModalOpen(true)} />
+      <AssetList
+        filter={filter}
+        onAddAsset={() => setIsModalOpen(true)}
+        bitcoinPrice={bitcoinPrice}
+      />
 
       {/* 銘柄追加モーダル */}
       <AddAssetModal

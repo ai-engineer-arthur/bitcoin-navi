@@ -6,6 +6,7 @@ import { useState } from 'react';
 
 interface HeaderProps {
   title?: string;
+  description?: string;
   onMenuClick?: () => void;
 }
 
@@ -13,7 +14,11 @@ interface HeaderProps {
  * ダッシュボードヘッダーコンポーネント
  * セッション情報の表示とログアウト機能を提供
  */
-export function Header({ title = 'Dashboard', onMenuClick }: HeaderProps) {
+export function Header({
+  title = 'Dashboard',
+  description = 'リアルタイム価格監視ダッシュボード',
+  onMenuClick
+}: HeaderProps) {
   const { data: session } = useSession();
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
 
@@ -41,7 +46,7 @@ export function Header({ title = 'Dashboard', onMenuClick }: HeaderProps) {
               {title}
             </h2>
             <p className="text-xs text-foreground-muted hidden lg:block">
-              リアルタイム価格監視ダッシュボード
+              {description}
             </p>
           </div>
         </div>

@@ -15,16 +15,6 @@ export default async function DashboardPage() {
 
   return (
     <div className="space-y-6">
-      {/* Page Header */}
-      <div>
-        <h1 className="text-3xl lg:text-4xl font-bold text-gradient mb-2">
-          Dashboard
-        </h1>
-        <p className="text-foreground-muted">
-          監視中の資産の概要を確認
-        </p>
-      </div>
-
       {/* Stats Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
         <StatCard
