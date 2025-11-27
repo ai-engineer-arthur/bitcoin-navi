@@ -1,5 +1,6 @@
 import { StatCard } from '@/components/features/stat-card';
 import { LatestPrices } from '@/components/features/latest-prices';
+import { BitcoinChart } from '@/components/features/bitcoin-chart';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { TrendingUp, Bitcoin, DollarSign, Bell } from 'lucide-react';
 import { fetchBitcoinPrice } from '@/lib/bitcoin-api';
@@ -65,18 +66,11 @@ export default async function DashboardPage() {
           <CardHeader>
             <CardTitle className="text-gradient flex items-center gap-2">
               <Bitcoin className="h-6 w-6 text-primary" />
-              Bitcoin (BTC)
+              Bitcoin (BTC) - 24時間チャート
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="h-64 flex flex-col items-center justify-center bg-primary/5 rounded-lg border border-primary/20 gap-4">
-              <TrendingUp className="h-12 w-12 text-primary opacity-50" />
-              <p className="text-foreground-muted text-center">
-                価格チャートは <strong className="text-primary">#012</strong> で実装予定
-                <br />
-                <span className="text-xs">Recharts を使用した7日間の価格推移</span>
-              </p>
-            </div>
+            <BitcoinChart height={256} />
           </CardContent>
         </Card>
 
