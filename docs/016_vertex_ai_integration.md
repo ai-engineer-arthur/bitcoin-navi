@@ -344,14 +344,43 @@ export interface ChatResponse {
 ```
 
 ## 完了条件
-- [ ] Vertex AI が正しく設定されている
-- [ ] チャット API が動作する
-- [ ] 価格履歴がコンテキストに注入される
-- [ ] エラーハンドリングが実装されている
-- [ ] リトライロジックが動作する
-- [ ] 型定義が正しい
+- [x] Vertex AI が正しく設定されている（2025-11-27 実装完了）
+- [x] チャット API が動作する（2025-11-27 実装完了）
+- [x] 価格履歴がコンテキストに注入される（2025-11-27 実装完了）
+- [x] エラーハンドリングが実装されている（2025-11-27 実装完了）
+- [x] リトライロジックが動作する（2025-11-27 実装完了）
+- [x] 型定義が正しい（2025-11-27 実装完了）
+
+## 2025-11-27 実装完了内容
+
+### ✅ 実装済み
+**REST API アプローチへの移行**
+- SDK (`@google/genai`) ではなく、直接 REST API を使用
+- `src/lib/vertexai/rest-client.ts` を実装
+- GoogleAuth を使用した認証
+- Temperature を 1.0 に設定（Google 推奨値）
+
+### 📂 実装ファイル
+- **`src/lib/vertexai/rest-client.ts`**: REST API クライアント
+- **`src/app/api/chat/route.ts`**: チャット API エンドポイント
+- **`src/app/(dashboard)/chat/page.tsx`**: チャット UI
+
+### 🔧 技術詳細
+- **認証**: GoogleAuth（Application Default Credentials）
+- **エンドポイント**: `https://us-central1-aiplatform.googleapis.com/v1/projects/{projectId}/locations/{location}/publishers/google/models/gemini-2.5-flash:generateContent`
+- **Temperature**: 1.0（Grounding 最適化）
+- **Grounding**: Web Grounding 対応（Google Search 統合）
+
+### ⚠️ SDK アプローチからの変更理由
+- Web Grounding が正しく動作しない問題を解決
+- Temperature 1.0 で最新の Web 検索結果を取得
+- より直接的な API 制御が可能
 
 ## 関連チケット
 - 前: #015 過去データ初期ロード機能
 - 次: #017 Grounding 実装
 - 関連: #008 AI チャット画面 UI
+- 関連: #019 Web Grounding トラブルシューティング
+
+## 完了日
+2025-11-27

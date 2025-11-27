@@ -5,7 +5,7 @@ Gemini の Grounding 機能を使用して、リアルタイムの Web 検索結
 
 ## 技術スタック
 - **AI Platform**: Vertex AI
-- **Model**: Gemini 2.5 Flash
+- **Model**: Gemini 2.5 pro
 - **Feature**: Grounding with Google Search
 
 ## TODO
@@ -385,14 +385,72 @@ export interface GroundedChatResponse extends ChatResponse {
 ```
 
 ## 完了条件
-- [ ] Grounding が正しく動作する
-- [ ] Citations が表示される
-- [ ] 検索クエリが最適化されている
-- [ ] UI が更新されている
-- [ ] キャッシュが実装されている
-- [ ] エラーハンドリングが実装されている
+- [x] Grounding が正しく動作する（2025-11-27 実装完了）
+- [x] Citations が表示される（2025-11-27 実装完了）
+- [x] 検索クエリが最適化されている（2025-11-27 実装完了）
+- [x] UI が更新されている（2025-11-27 実装完了）
+- [ ] キャッシュが実装されている（未実装）
+- [x] エラーハンドリングが実装されている（2025-11-27 実装完了）
+
+## 2025-11-27 実装完了内容
+
+### ✅ 実装済み
+**REST API を使用した Web Grounding**
+- SDK アプローチから REST API に移行
+- `src/lib/vertexai/rest-client.ts` で実装
+- Temperature 1.0 を使用（Google 推奨値）
+- 最新の Web 検索結果を取得可能に
+
+### 📂 実装ファイル
+- **`src/lib/vertexai/rest-client.ts`**: REST API クライアント（Grounding 対応）
+  ```typescript
+  export async function generateContentWithGrounding(
+    messages: Array<{ role: 'user' | 'assistant'; content: string }>,
+    options: { temperature?: number; topP?: number; maxOutputTokens?: number; model?: string } = {}
+  )
+  ```
+- **`src/app/api/chat/route.ts`**: チャット API（Grounding 対応）
+- **`src/app/(dashboard)/chat/page.tsx`**: UI（Citations 表示対応）
+
+### 🔧 技術詳細
+- **Grounding ツール**: `tools: [{ googleSearch: {} }]`
+- **Temperature**: 1.0（Grounding 最適化のため）
+- **Grounding メタデータ抽出**:
+  - `groundingMetadata.webSearchQueries`: 検索クエリ
+  - `groundingMetadata.groundingChunks`: Web ソース（URL、タイトル）
+- **UI 表示**: Citations をマークダウンリンクとして表示
+
+### ⚠️ トラブルシューティング
+- **問題**: 2024年5月24日時点の情報が返される
+- **原因**: Temperature が低すぎた（0.2 または 0.7）
+- **解決**: Temperature 1.0 + REST API で最新情報取得
+- 詳細: `docs/019_grounding_troubleshooting.md` 参照
+
+### 📊 Grounding 動作フロー
+1. ユーザーメッセージ受信
+2. システムプロンプト + ユーザーメッセージを構築
+3. Vertex AI に `tools: [{ googleSearch: {} }]` 付きでリクエスト
+4. Google Search で Web 検索実行
+5. 検索結果を元に回答生成
+6. Grounding メタデータ（検索クエリ、ソース）を抽出
+7. UI に回答 + Citations 表示
+
+### 🎯 Citations UI
+```typescript
+// src/app/(dashboard)/chat/page.tsx
+if (data.groundingInfo && data.groundingInfo.length > 0) {
+  assistantContent += '\n\n📚 **参考情報:**\n';
+  data.groundingInfo.forEach((info, index) => {
+    assistantContent += `${index + 1}. [${info.title}](${info.uri})\n`;
+  });
+}
+```
 
 ## 関連チケット
 - 前: #016 Vertex AI Gemini 統合
 - 次: #018 チャット機能完成
 - 関連: #008 AI チャット画面 UI
+- 関連: #019 Web Grounding トラブルシューティング
+
+## 完了日
+2025-11-27
